@@ -25,6 +25,11 @@ def parse_args():
         default=None,
         help="Output directory for plots/metrics (default: dataset-dir)",
     )
+    parser.add_argument(
+        "--synthetic-label",
+        default="GAN",
+        help="Label to use for the generated dataset in plots and logs.",
+    )
     parser.add_argument("--rf-col", type=int, default=-1, help="RF attenuation column index")
     parser.add_argument("--n-haps", type=int, default=4)
     parser.add_argument("--n-trials", type=int, default=50000)
@@ -92,11 +97,11 @@ def main():
 
     gan = pd.read_csv(gan_path).to_numpy(dtype=np.float64)
     real = pd.read_csv(real_path).to_numpy(dtype=np.float64)
-    print("Loaded shapes: GAN", gan.shape, "REAL", real.shape)
+    print(f"Loaded shapes: {args.synthetic_label}", gan.shape, "REAL", real.shape)
 
     real_rf_db = real[:, args.rf_col].astype(np.float64).ravel()
     gan_rf_db = gan[:, args.rf_col].astype(np.float64).ravel()
-    print("Means dB -> real:", real_rf_db.mean(), "gan:", gan_rf_db.mean())
+    print(f"Means dB -> real: {real_rf_db.mean()} {args.synthetic_label}: {gan_rf_db.mean()}")
 
     real_parts = split_parts_1d(real_rf_db, k=args.n_haps)
     gan_parts = split_parts_1d(gan_rf_db, k=args.n_haps)
@@ -159,10 +164,10 @@ def main():
 
     plt.figure(figsize=(8, 5))
     plt.semilogy(pt_values, out_real, "o-", label="Real (selection)")
-    plt.semilogy(pt_values, out_gan, "s-", label="GAN (selection)")
+    plt.semilogy(pt_values, out_gan, "s-", label=f"{args.synthetic_label} (selection)")
     plt.xlabel("Transmit Power (W)")
     plt.ylabel("Outage Probability")
-    plt.title("Outage Probability (Real vs GAN) - using RF loss column only")
+    plt.title(f"Outage Probability (Real vs {args.synthetic_label}) - using RF loss column only")
     plt.grid(True)
     plt.legend()
     outage_plot = os.path.join(out_dir, "hap_outage_probability_real_vs_gan.png")
@@ -172,10 +177,10 @@ def main():
 
     plt.figure(figsize=(8, 5))
     plt.plot(pt_values, ec_real, "o-", label="Real (selection)")
-    plt.plot(pt_values, ec_gan, "s-", label="GAN (selection)")
+    plt.plot(pt_values, ec_gan, "s-", label=f"{args.synthetic_label} (selection)")
     plt.xlabel("Transmit Power (W)")
     plt.ylabel("Ergodic Capacity (bits/s/Hz)")
-    plt.title("Ergodic Capacity (Real vs GAN) - using RF loss column only")
+    plt.title(f"Ergodic Capacity (Real vs {args.synthetic_label}) - using RF loss column only")
     plt.grid(True)
     plt.legend()
     ec_plot = os.path.join(out_dir, "hap_ergodic_capacity_real_vs_gan.png")
@@ -191,4 +196,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

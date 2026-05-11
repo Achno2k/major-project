@@ -45,7 +45,9 @@ and save model artifacts (`generator_final.h5`, discriminator/critic model, scal
 Run HAP analysis on any generated dataset folder:
 
 ```bash
-python3 run_hap_analysis.py --dataset-dir ../generated_datasets_wgan
+python3 run_hap_analysis.py \
+  --dataset-dir ../generated_datasets_wgan \
+  --synthetic-label WGAN
 ```
 
 This saves:
@@ -54,12 +56,23 @@ This saves:
 - `hap_outage_probability_real_vs_gan.png`
 - `hap_ergodic_capacity_real_vs_gan.png`
 
+Run WGAN-GP and immediately generate the matching HAP plots:
+
+```bash
+python3 run_wgan_hap_pipeline.py \
+  --file-path ../corrected_channel_dataset.xlsx \
+  --output-dir ../generated_datasets_wgan \
+  --model-dir ../generated_models_wgan \
+  --rf-attenuation-shift-db -20
+```
+
 Compare CGAN vs WGAN HAP outputs:
 
 ```bash
 python3 compare_hap_outputs.py \
   --cgan-dir ../generated_datasets_cgan \
-  --wgan-dir ../generated_datasets_wgan
+  --wgan-dir ../generated_datasets_wgan \
+  --reference-style
 ```
 
 This saves:
@@ -67,3 +80,19 @@ This saves:
 - `hap_metrics_cgan_vs_wgan.csv`
 - `compare_hap_outage_cgan_vs_wgan.png`
 - `compare_hap_ec_cgan_vs_wgan.png`
+
+Run SHAP ExAI analysis for generated outputs:
+
+```bash
+python3 run_shap_exai.py \
+  --model both \
+  --cgan-model-dir ../.run_artifacts/cgan_models \
+  --wgan-model-dir ../.run_artifacts/wgan_models \
+  --out-dir ../.run_artifacts/shap_exai
+```
+
+This explains how the six conditioning inputs affect each generated output:
+
+- `FSO_Attenuation_Visibility_dB`
+- `FSO_Attenuation_Cloud_Model_dB`
+- `RF_Total_Attenuation_dB`

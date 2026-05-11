@@ -1,2 +1,5 @@
 venv/
+.venv39/
+.cache/
+.run_artifacts/
 .pycache/
